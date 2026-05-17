@@ -50,13 +50,12 @@ export default function Dashboard() {
   const bradenScore = hitungBraden();
   const finalBraden = isCalculating ? displayBraden : bradenScore;
   const finalPressure = isCalculating ? displayPressure : pressure;
-
-  const risiko = finalBraden <= 14 ? "TINGGI" : "RENDAH";
+  const risiko = finalBraden <= 14 ? "HIGH" : "LOW";
   const tekananTinggi = finalPressure >= 35;
 
   const angle = Math.min(Math.max((finalPressure / 100) * 180 - 90, -90), 90);
 
-  const waktuReposisi = lastReposition.toLocaleTimeString("id-ID", {
+  const waktuReposisi = lastReposition.toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -70,7 +69,7 @@ export default function Dashboard() {
   return (
     <div>
       <div className="page-header animate-fade-in">
-        <h1>Dashboard Monitoring Tekanan Tumit</h1>
+        <h1>Heel Pressure Monitoring Dashboard</h1>
         <p>Real-time pressure analytics and patient status overview.</p>
       </div>
 
@@ -78,42 +77,42 @@ export default function Dashboard() {
         <div className="card animate-fade-in delay-1">
           <div className="card-title">
             <IdCard size={16} />
-            IDENTITAS PASIEN
+            PATIENT IDENTIFICATION
           </div>
           
           <div className="patient-info-row">
-            <span>Nama</span>
+            <span>Name</span>
             <span>:</span>
-            <span>{patient.nama || "dadaw"}</span>
+            <span>{patient.nama || "-"}</span>
           </div>
           <div className="patient-info-row">
-            <span>Umur</span>
+            <span>Age</span>
             <span>:</span>
-            <span>{patient.umur || "12"} Tahun</span>
+            <span>{patient.umur || "-"} yrs</span>
           </div>
           <div className="patient-info-row">
-            <span>Jenis Kelamin</span>
+            <span>Gender</span>
             <span>:</span>
-            <span>{patient.jenisKelamin || "Perempuan"}</span>
+            <span>{patient.jenisKelamin || "-"}</span>
           </div>
         </div>
 
-        <div className="card risk-card animate-fade-in delay-2" style={{ border: isCalculating ? "1px solid #8b949e" : "1px solid #d9f924" }}>
+        <div className="card risk-card animate-fade-in delay-2" style={{ border: isCalculating ? "1px solid #8b949e" : "1px solid var(--accent-color)" }}>
           <div>
             <h2 style={{ fontSize: "28px", fontWeight: "900", color: "#fff", lineHeight: "1.2" }}>
-              RISIKO<br />DEKUBITUS
+              PRESSURE<br />ULCER RISK
             </h2>
             <p style={{ color: "#8b949e", fontSize: "12px", letterSpacing: "2px", marginTop: "8px", textTransform: "uppercase" }}>
-              {isCalculating ? "Mengkalkulasi..." : "Skor Skala Braden"}
+              {isCalculating ? "Calculating..." : "Braden Scale Score"}
             </p>
           </div>
           <div className="risk-score">
-            <h1 style={{ color: isCalculating ? "#8b949e" : (risiko === "TINGGI" ? "#ef4444" : "#22c55e") }}>
+            <h1 style={{ color: isCalculating ? "#8b949e" : (risiko === "HIGH" ? "#ef4444" : "#22c55e") }}>
               {finalBraden}
             </h1>
             <div className="risk-badge" style={{ 
-              background: isCalculating ? "rgba(139, 148, 158, 0.2)" : (risiko === "TINGGI" ? "rgba(239, 68, 68, 0.2)" : "rgba(34, 197, 94, 0.2)"),
-              color: isCalculating ? "#8b949e" : (risiko === "TINGGI" ? "#ef4444" : "#22c55e") 
+              background: isCalculating ? "rgba(139, 148, 158, 0.2)" : (risiko === "HIGH" ? "rgba(239, 68, 68, 0.2)" : "rgba(34, 197, 94, 0.2)"),
+              color: isCalculating ? "#8b949e" : (risiko === "HIGH" ? "#ef4444" : "#22c55e") 
             }}>
               {isCalculating ? "..." : risiko}
             </div>
@@ -125,7 +124,7 @@ export default function Dashboard() {
         <div className="card animate-fade-in delay-3">
           <div className="card-title">
             <Gauge size={16} />
-            {isCalculating ? "ANALYZING SENSOR..." : "TEKANAN TUMIT"}
+            {isCalculating ? "ANALYZING SENSOR..." : "HEEL PRESSURE"}
           </div>
           
           <div className="gauge-container">
@@ -147,9 +146,9 @@ export default function Dashboard() {
             </div>
 
             <div className={`status-badge ${isCalculating ? "" : (tekananTinggi ? "danger" : "safe")}`} style={{ border: isCalculating ? "1px solid #30363d" : undefined, color: isCalculating ? "#8b949e" : undefined, background: isCalculating ? "transparent" : undefined }}>
-              {isCalculating ? "Menghitung..." : (tekananTinggi ? "Tekanan Tinggi" : "Aman")}
+              {isCalculating ? "Calculating..." : (tekananTinggi ? "High Pressure" : "Safe")}
             </div>
-            <p className="limit-text">Batas Aman: &lt; 35 mmHg</p>
+            <p className="limit-text">Safe Threshold: &lt; 35 mmHg</p>
           </div>
         </div>
 
@@ -157,15 +156,15 @@ export default function Dashboard() {
           <div className="card animate-fade-in delay-4">
             <div className="card-title">
               <Clock size={16} />
-              WAKTU REPOSISI TERAKHIR
+              LAST REPOSITION TIME
             </div>
             
             <div className="timer-display">
               <h1>{waktuReposisi}</h1>
               <div className="timer-box">
-                <span>Timer Reposisi</span>
+                <span>Reposition Timer</span>
                 <b>{formatTimer(timerReposisi)}</b>
-                <p>Tahap: {servoStatus} {tahapReposisi ? `(${tahapReposisi})` : ""}</p>
+                <p>Stage: {servoStatus} {tahapReposisi ? `(${tahapReposisi})` : ""}</p>
               </div>
             </div>
           </div>
@@ -182,8 +181,8 @@ export default function Dashboard() {
                   <Loader size={24} className="animate-spin" />
                 </div>
                 <div className="notif-content">
-                  <h3>Menganalisa Status</h3>
-                  <p>Mohon tunggu sebentar...</p>
+                  <h3>Analyzing Status</h3>
+                  <p>Please wait...</p>
                 </div>
               </div>
             ) : (
@@ -192,33 +191,33 @@ export default function Dashboard() {
                   {tekananTinggi ? <AlertCircle size={24} /> : <CheckCircle size={24} />}
                 </div>
                 <div className="notif-content">
-                  <h3>{tekananTinggi ? "PERINGATAN" : "AMAN"}</h3>
+                  <h3>{tekananTinggi ? "ALERT" : "SAFE"}</h3>
                   <p>
                     {tekananTinggi
-                      ? `Tekanan mencapai ${finalPressure.toFixed(1)} mmHg`
-                      : "Tekanan dalam batas normal"}
+                      ? `Pressure reached ${finalPressure.toFixed(1)} mmHg`
+                      : "Pressure within normal range"}
                   </p>
                 </div>
               </div>
             )}
 
-            <div className="notif-box" style={{ background: "rgba(59, 130, 246, 0.05)", border: "1px solid rgba(59, 130, 246, 0.2)" }}>
-              <div className="icon-circle" style={{ background: "rgba(59, 130, 246, 0.1)", color: "#3b82f6" }}>
+            <div className="notif-box" style={{ background: "rgba(21, 128, 61, 0.06)", border: "1px solid rgba(21, 128, 61, 0.16)" }}>
+              <div className="icon-circle" style={{ background: "rgba(21, 128, 61, 0.12)", color: "#15803d" }}>
                 <Info size={24} />
               </div>
               <div className="notif-content">
-                <h3>Reposisi Otomatis</h3>
+                <h3>Automatic Repositioning</h3>
                 <p>
                   {prosesReposisi
-                    ? `Servo berada di posisi ${servoStatus}`
-                    : "Menunggu tekanan tinggi"}
+                    ? `Servo is in ${servoStatus}`
+                    : "Waiting for high pressure"}
                 </p>
               </div>
             </div>
 
-            <div style={{ display: "flex", justifyContent: "space-between", background: "rgba(255,255,255,0.03)", padding: "12px 16px", borderRadius: "8px", marginTop: "16px", fontSize: "14px", color: "#e5e7eb" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", background: "rgba(15, 23, 42, 0.04)", padding: "12px 16px", borderRadius: "8px", marginTop: "16px", fontSize: "14px", color: "var(--text-main)" }}>
               <span>Jumlah Reposisi</span>
-              <b style={{ color: "#d9f924" }}>{jumlahReposisi} Kali</b>
+              <b style={{ color: "var(--accent-color)" }}>{jumlahReposisi} Times</b>
             </div>
           </div>
         </div>

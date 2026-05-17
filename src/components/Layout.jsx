@@ -27,7 +27,7 @@ function Sidebar() {
           <Activity size={20} />
         </div>
         <div>
-          <h2>HeelWatch Pro</h2>
+          <h2>TumitIntan</h2>
           <p>Pressure Monitoring</p>
         </div>
       </div>
@@ -61,16 +61,20 @@ function Sidebar() {
 
 export default function Layout() {
   const location = useLocation();
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+
+    return () => {
+      document.documentElement.setAttribute('data-theme', 'light');
+    };
   }, [isDarkMode]);
 
-  const getBreadcrumbs = () => {
-    if (location.pathname === "/dashboard") return "Dashboard / Assessment";
-    if (location.pathname === "/monitoring") return "Dashboard / Monitor Risk";
-    if (location.pathname === "/patients") return "Dashboard / Patients Directory";
+  const getPageTitle = () => {
+    if (location.pathname === "/dashboard") return "Input Data";
+    if (location.pathname === "/monitoring") return "Monitor Risk";
+    if (location.pathname === "/patients") return "Patients Directory";
     return "Dashboard";
   };
 
@@ -79,16 +83,9 @@ export default function Layout() {
       <Sidebar />
       <div className="main-content">
         <div className="topbar">
-          <div className="breadcrumb">
-            <Home size={14} />
-            {getBreadcrumbs().split(" / ").map((crumb, idx, arr) => (
-              <span key={idx} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                {idx > 0 && <ChevronRight size={14} />}
-                <span style={{ color: idx === arr.length - 1 ? "#e5e7eb" : "inherit" }}>
-                  {crumb}
-                </span>
-              </span>
-            ))}
+          <div className="page-title">
+            <Home size={16} />
+            <span>{getPageTitle()}</span>
           </div>
           <div className="user-profile">
             <button className="btn-icon" onClick={() => setIsDarkMode(!isDarkMode)} style={{ border: "none" }}>

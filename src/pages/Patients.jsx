@@ -6,7 +6,7 @@ import { useFirebase } from "../context/FirebaseContext";
 export default function Patients() {
   const { patientsList, setPatient, deletePatientRecord } = useFirebase();
   const navigate = useNavigate();
-  const [filter, setFilter] = useState("Semua");
+  const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
   const [viewPatient, setViewPatient] = useState(null);
 
@@ -21,7 +21,7 @@ export default function Patients() {
 
   const filteredPatients = patientsList.filter(p => {
     const matchSearch = p.nama?.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = filter === "Semua" || p.risk === filter.toUpperCase();
+    const matchFilter = filter === "All" || p.risk === filter.toUpperCase();
     return matchSearch && matchFilter;
   });
 
@@ -31,7 +31,7 @@ export default function Patients() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus data pasien ini?")) {
+    if (window.confirm("Are you sure you want to delete this patient record?")) {
       await deletePatientRecord(id);
     }
   };
@@ -39,8 +39,8 @@ export default function Patients() {
   return (
     <div>
       <div className="page-header">
-        <h1>Daftar Pasien</h1>
-        <p>Manajemen data dan pemantauan risiko dekubitus.</p>
+        <h1>Patient List</h1>
+        <p>Patient data management and pressure injury risk monitoring.</p>
       </div>
 
       <div className="filters-bar">
@@ -48,7 +48,7 @@ export default function Patients() {
           <Search size={16} />
           <input 
             type="text" 
-            placeholder="Cari nama pasien..." 
+            placeholder="Search patient name..." 
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -56,22 +56,22 @@ export default function Patients() {
 
         <div className="filter-pills">
           <div 
-            className={`pill ${filter === "Semua" ? "active" : ""}`}
-            onClick={() => setFilter("Semua")}
+            className={`pill ${filter === "All" ? "active" : ""}`}
+            onClick={() => setFilter("All")}
           >
-            <div className="pill-dot all"></div> Semua
+            <div className="pill-dot all"></div> All
           </div>
           <div 
-            className={`pill ${filter === "Tinggi" ? "active" : ""}`}
-            onClick={() => setFilter("Tinggi")}
+            className={`pill ${filter === "High" ? "active" : ""}`}
+            onClick={() => setFilter("High")}
           >
-            <div className="pill-dot high"></div> Risiko Tinggi
+            <div className="pill-dot high"></div> High
           </div>
           <div 
-            className={`pill ${filter === "Rendah" ? "active" : ""}`}
-            onClick={() => setFilter("Rendah")}
+            className={`pill ${filter === "Low" ? "active" : ""}`}
+            onClick={() => setFilter("Low")}
           >
-            <div className="pill-dot low"></div> Rendah
+            <div className="pill-dot low"></div> Low
           </div>
         </div>
       </div>
@@ -80,11 +80,11 @@ export default function Patients() {
         <table>
           <thead>
             <tr>
-              <th>NAMA PASIEN</th>
-              <th>GENDER</th>
-              <th>UMUR</th>
-              <th>RISIKO DEKUBITUS</th>
-              <th>AKSI</th>
+              <th>Patient Name</th>
+              <th>Gender</th>
+              <th>Age</th>
+              <th>Pressure Ulcer Risk</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -96,12 +96,12 @@ export default function Patients() {
                     <span>{p.nama}</span>
                   </div>
                 </td>
-                <td>{p.jenisKelamin === "Laki-laki" ? "L" : "P"}</td>
-                <td>{p.umur} thn</td>
+                <td>{p.jenisKelamin === "Male" ? "M" : "F"}</td>
+                <td>{p.umur} yrs</td>
                 <td>
-                  <div className={`risk-tag ${p.risk === "TINGGI" ? "high" : "low"}`}>
-                    <div className={`pill-dot ${p.risk === "TINGGI" ? "high" : "low"}`}></div>
-                    {p.risk || "RENDAH"}
+                  <div className={`risk-tag ${p.risk === "HIGH" ? "high" : "low"}`}>
+                    <div className={`pill-dot ${p.risk === "HIGH" ? "high" : "low"}`}></div>
+                    {p.risk || "LOW"}
                   </div>
                 </td>
                 <td>
@@ -117,7 +117,7 @@ export default function Patients() {
         </table>
         
         <div className="pagination">
-          <div>Menampilkan 1-{filteredPatients.length} dari {patientsList.length} pasien</div>
+          <div>Showing 1-{filteredPatients.length} of {patientsList.length} patients</div>
           <div className="page-controls">
             <button className="page-btn">Prev</button>
             <button className="page-btn active">1</button>
@@ -132,30 +132,30 @@ export default function Patients() {
             <button className="btn-icon" style={{ position: "absolute", top: "16px", right: "16px", border: "none" }} onClick={() => setViewPatient(null)}>
               <X size={20} />
             </button>
-            <h2 style={{ color: "#fff", marginBottom: "24px", fontSize: "20px" }}>Detail Pasien</h2>
-            
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px", color: "#e5e7eb", fontSize: "14px" }}>
+            <h2 style={{ color: "var(--text-bright)", marginBottom: "20px", fontSize: "20px" }}>Patient Details</h2>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px", color: "var(--text-main)", fontSize: "14px" }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#8b949e" }}>Nama</span>
+                <span style={{ color: "var(--text-muted)" }}>Name</span>
                 <b>{viewPatient.nama}</b>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#8b949e" }}>Umur</span>
-                <b>{viewPatient.umur} Tahun</b>
+                <span style={{ color: "var(--text-muted)" }}>Age</span>
+                <b>{viewPatient.umur} yrs</b>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#8b949e" }}>Jenis Kelamin</span>
+                <span style={{ color: "var(--text-muted)" }}>Gender</span>
                 <b>{viewPatient.jenisKelamin}</b>
               </div>
-              <hr style={{ borderColor: "#30363d", margin: "12px 0" }} />
+              <hr style={{ borderColor: "var(--border-color)", margin: "12px 0" }} />
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#8b949e" }}>Skor Braden</span>
+                <span style={{ color: "var(--text-muted)" }}>Braden Score</span>
                 <b>{viewPatient.bradenScore}</b>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ color: "#8b949e" }}>Risiko Dekubitus</span>
-                <div className={`risk-tag ${viewPatient.risk === "TINGGI" ? "high" : "low"}`}>
-                  {viewPatient.risk || "RENDAH"}
+                <span style={{ color: "var(--text-muted)" }}>Pressure Ulcer Risk</span>
+                <div className={`risk-tag ${viewPatient.risk === "HIGH" ? "high" : "low"}`}>
+                  {viewPatient.risk || "LOW"}
                 </div>
               </div>
             </div>
