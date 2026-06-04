@@ -27,7 +27,7 @@ function Sidebar() {
           <Activity size={20} />
         </div>
         <div>
-          <h2>TumitIntan</h2>
+          <h2>HeelUp</h2>
           <p>Pressure Monitoring</p>
         </div>
       </div>

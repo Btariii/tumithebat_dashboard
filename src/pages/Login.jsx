@@ -21,7 +21,7 @@ export default function Login() {
       <form className="login-box" onSubmit={handleLogin}>
         <div>
           <h1>Login</h1>
-          <p className="subtitle">Access your HeelWatch Pro dashboard.</p>
+          <p className="subtitle">Access your HeelUp Pro dashboard.</p>
         </div>
 
         <div className="input-group">

@@ -24,7 +24,35 @@ export default function InputData() {
     );
   };
 
+  const tentukanRisikoDanDurasi = (skorBraden) => {
+    if (skorBraden <= 12) {
+      return {
+        risiko: "TINGGI",
+        risk: "HIGH",
+        durasiReposisiDetik: 60,
+        keteranganDurasi: "1 menit tiap posisi",
+      };
+    }
+
+    if (skorBraden <= 18) {
+      return {
+        risiko: "SEDANG",
+        risk: "MEDIUM",
+        durasiReposisiDetik: 120,
+        keteranganDurasi: "2 menit tiap posisi",
+      };
+    }
+
+    return {
+      risiko: "RENDAH",
+      risk: "LOW",
+      durasiReposisiDetik: 180,
+      keteranganDurasi: "3 menit tiap posisi",
+    };
+  };
+
   const bradenScore = hitungBraden();
+  const hasilRisiko = tentukanRisikoDanDurasi(bradenScore);
 
   const isFormValid = () => {
     return (
@@ -54,34 +82,35 @@ export default function InputData() {
     });
   };
 
-  const handleLihatRisiko = () => {
-    if (isFormValid()) {
-      navigate("/monitoring");
-    } else {
-      alert("Please complete all fields before viewing risk!");
-    }
-  };
+  const buatDataPasienLengkap = () => {
+    const skor = hitungBraden();
+    const hasil = tentukanRisikoDanDurasi(skor);
 
-  const handleSimpan = async (e) => {
-    e.preventDefault();
-    if (!isFormValid()) {
-      alert("Please complete all fields before saving!");
-      return;
-    }
-    
-    const patientData = {
+    return {
       nama: patient.nama,
       jenisKelamin: patient.jenisKelamin,
       umur: patient.umur,
+
       persepsiSensori: patient.persepsiSensori,
       kelembapan: patient.kelembapan,
       aktivitas: patient.aktivitas,
       mobilitas: patient.mobilitas,
       nutrisi: patient.nutrisi,
       gesekan: patient.gesekan,
-      bradenScore: hitungBraden(),
-      risk: hitungBraden() <= 14 ? "HIGH" : "LOW"
+
+      skorBraden: skor,
+      bradenScore: skor,
+
+      risiko: hasil.risiko,
+      risk: hasil.risk,
+
+      durasiReposisiDetik: hasil.durasiReposisiDetik,
+      keteranganDurasi: hasil.keteranganDurasi,
     };
+  };
+
+  const simpanKeFirebase = async () => {
+    const patientData = buatDataPasienLengkap();
 
     if (patient.id) {
       await updatePatientRecord(patient.id, patientData);
@@ -89,19 +118,52 @@ export default function InputData() {
       await addPatient(patientData);
     }
 
-    setPatient({
-      nama: "",
-      umur: "",
-      jenisKelamin: "",
-      persepsiSensori: "",
-      kelembapan: "",
-      aktivitas: "",
-      mobilitas: "",
-      nutrisi: "",
-      gesekan: "",
-    });
+    return patientData;
+  };
 
-    navigate("/patients");
+  const handleLihatRisiko = async () => {
+    if (!isFormValid()) {
+      alert("Lengkapi semua data sebelum melihat monitoring!");
+      return;
+    }
+
+    try {
+      await simpanKeFirebase();
+      navigate("/monitoring");
+    } catch (error) {
+      console.error(error);
+      alert("Gagal menyimpan data ke Firebase");
+    }
+  };
+
+  const handleSimpan = async (e) => {
+    e.preventDefault();
+
+    if (!isFormValid()) {
+      alert("Lengkapi semua data sebelum menyimpan!");
+      return;
+    }
+
+    try {
+      await simpanKeFirebase();
+
+      setPatient({
+        nama: "",
+        umur: "",
+        jenisKelamin: "",
+        persepsiSensori: "",
+        kelembapan: "",
+        aktivitas: "",
+        mobilitas: "",
+        nutrisi: "",
+        gesekan: "",
+      });
+
+      navigate("/patients");
+    } catch (error) {
+      console.error(error);
+      alert("Gagal menyimpan data ke Firebase");
+    }
   };
 
   return (
@@ -118,7 +180,7 @@ export default function InputData() {
               <IdCard size={16} />
               Identity
             </div>
-            
+
             <div className="form-group">
               <label>Patient Name</label>
               <input
@@ -129,7 +191,7 @@ export default function InputData() {
               />
             </div>
 
-              <div className="form-group" style={{ marginTop: "16px" }}>
+            <div className="form-group" style={{ marginTop: "16px" }}>
               <label>Age</label>
               <input
                 type="number"
@@ -160,11 +222,16 @@ export default function InputData() {
               <ActivitySquare size={16} />
               Braden Scale
             </div>
-            
+
             <div className="form-grid" style={{ gap: "16px" }}>
               <div className="form-group">
                 <label>Sensory Perception</label>
-                <select name="persepsiSensori" className={getSelectClassName(patient.persepsiSensori)} value={patient.persepsiSensori} onChange={handleChange}>
+                <select
+                  name="persepsiSensori"
+                  className={getSelectClassName(patient.persepsiSensori)}
+                  value={patient.persepsiSensori}
+                  onChange={handleChange}
+                >
                   <option value="">Select sensory perception</option>
                   <option value="1">1 - Completely Limited</option>
                   <option value="2">2 - Very Limited</option>
@@ -175,7 +242,12 @@ export default function InputData() {
 
               <div className="form-group">
                 <label>Moisture</label>
-                <select name="kelembapan" className={getSelectClassName(patient.kelembapan)} value={patient.kelembapan} onChange={handleChange}>
+                <select
+                  name="kelembapan"
+                  className={getSelectClassName(patient.kelembapan)}
+                  value={patient.kelembapan}
+                  onChange={handleChange}
+                >
                   <option value="">Select moisture level</option>
                   <option value="1">1 - Always Moist</option>
                   <option value="2">2 - Often Moist</option>
@@ -186,7 +258,12 @@ export default function InputData() {
 
               <div className="form-group">
                 <label>Activity</label>
-                <select name="aktivitas" className={getSelectClassName(patient.aktivitas)} value={patient.aktivitas} onChange={handleChange}>
+                <select
+                  name="aktivitas"
+                  className={getSelectClassName(patient.aktivitas)}
+                  value={patient.aktivitas}
+                  onChange={handleChange}
+                >
                   <option value="">Select activity level</option>
                   <option value="1">1 - Bedfast / Confined to bed</option>
                   <option value="2">2 - Chairfast / Confined to chair</option>
@@ -197,7 +274,12 @@ export default function InputData() {
 
               <div className="form-group">
                 <label>Mobility</label>
-                <select name="mobilitas" className={getSelectClassName(patient.mobilitas)} value={patient.mobilitas} onChange={handleChange}>
+                <select
+                  name="mobilitas"
+                  className={getSelectClassName(patient.mobilitas)}
+                  value={patient.mobilitas}
+                  onChange={handleChange}
+                >
                   <option value="">Select mobility level</option>
                   <option value="1">1 - Completely Immobile</option>
                   <option value="2">2 - Very Limited</option>
@@ -208,18 +290,28 @@ export default function InputData() {
 
               <div className="form-group">
                 <label>Nutrition</label>
-                <select name="nutrisi" className={getSelectClassName(patient.nutrisi)} value={patient.nutrisi} onChange={handleChange}>
+                <select
+                  name="nutrisi"
+                  className={getSelectClassName(patient.nutrisi)}
+                  value={patient.nutrisi}
+                  onChange={handleChange}
+                >
                   <option value="">Select nutrition condition</option>
-                  <option value="1">1 - Very Poor</option>
-                  <option value="2">2 - Poor</option>
-                  <option value="3">3 - Adequate</option>
-                  <option value="4">4 - Good</option>
+                  <option value="1">1 - Very Poor / Makan sangat sedikit</option>
+                  <option value="2">2 - Poor / Makan kurang</option>
+                  <option value="3">3 - Enough / Makan cukup</option>
+                  <option value="4">4 - Good / Makan baik</option>
                 </select>
               </div>
 
               <div className="form-group">
                 <label>Friction / Shear</label>
-                <select name="gesekan" className={getSelectClassName(patient.gesekan)} value={patient.gesekan} onChange={handleChange}>
+                <select
+                  name="gesekan"
+                  className={getSelectClassName(patient.gesekan)}
+                  value={patient.gesekan}
+                  onChange={handleChange}
+                >
                   <option value="">Select friction/shear condition</option>
                   <option value="1">1 - Problem</option>
                   <option value="2">2 - Potential problem</option>
@@ -233,12 +325,29 @@ export default function InputData() {
         <div className="assessment-result">
           <div>
             <h3>Assessment Result</h3>
-            <h2>Total Braden Score: <span>{bradenScore}</span></h2>
+            <h2>
+              Total Braden Score: <span>{bradenScore}</span>
+            </h2>
+            <p>
+              Risk: <b>{hasilRisiko.risiko}</b> | Reposition duration:{" "}
+              <b>{hasilRisiko.keteranganDurasi}</b>
+            </p>
           </div>
+
           <div className="result-actions">
-            <button type="button" className="btn-outline" onClick={handleKosongkan}>Reset</button>
-            <button type="button" className="btn-outline" onClick={handleLihatRisiko}>Monitor Risk</button>
-            <button type="submit" className="btn-primary" style={{ padding: "10px 20px" }}>
+            <button type="button" className="btn-outline" onClick={handleKosongkan}>
+              Reset
+            </button>
+
+            <button type="button" className="btn-outline" onClick={handleLihatRisiko}>
+              Monitor Risk
+            </button>
+
+            <button
+              type="submit"
+              className="btn-primary"
+              style={{ padding: "10px 20px" }}
+            >
               {patient.id ? "Save Update" : "Save Record"} <ArrowRight size={16} />
             </button>
           </div>
